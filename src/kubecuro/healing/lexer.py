@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 KUBECURO LEXER - Phase 1.1 (The Refurbisher)
 --------------------------------------------
