@@ -8,8 +8,8 @@ All production edges covered: memory, partial heal, file input, BOM, etc.
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import sys
-from src.kubecuro.healing.lexer import RawLexer
-from src.kubecuro.healing.structure import KubeStructurer
+from kubecuro.healing.lexer import RawLexer
+from kubecuro.healing.structurer import KubeStructurer
 
 
 class HealingPipeline:
