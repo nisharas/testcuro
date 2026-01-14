@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import io
 import re
 import sys
@@ -11,14 +10,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.parser import ParserError
 from ruamel.yaml.scanner import ScannerError
 
-# Phase 1.1 Connection
-try:
-    from lexer import RawLexer
-except ImportError:
-    # Fallback for testing environments without the lexer file
-    class RawLexer:
-        def process_string(self, s: str) -> str: 
-            return s
+from kubecuro.healing.lexer import RawLexer
 
 """
 KUBECURO STRUCTURER - Phase 1.2 (The Architect) - ENTERPRISE GRADE
@@ -238,85 +230,5 @@ class KubeStructurer:
 		
 		
 		
-		
-		
-# ════════════════════════════════════════════════════════════════
-# ENTERPRISE VALIDATION - ALL 8 EDGE CASES
-# ════════════════════════════════════════════════════════════════
-def run_structurer_demo():
-    """Tests ALL 8 critical edge cases."""
-    try:
-        from lexer import RawLexer
-    except ImportError:
-        print("⚠️  lexer.py not found - using mock lexer")
-        class RawLexer:
-            def process_string(self, s): return s
 
-    structurer = KubeStructurer()
-    lexer = RawLexer()
-    
-    test_cases = [
-        # FIX 1+4: CRLF disasters
-        {
-            'name': 'CRLF + 63-space disaster',
-            'input': """spec:\r\n                                                                  -name: app\r\n""",
-            'expected': 'STRUCTURE_FIXED_1'
-        },
-        # FIX 2: Multi-document
-        {
-            'name': 'Multi-document indent disaster',
-            'input': """---\napiVersion: v1\n---\n  spec:\n                                   containers:\n""",
-            'expected': 'MULTI_DOC_HANDLED'
-        },
-        # FIX 3: Anchors/aliases
-        {
-            'name': 'Anchor preservation',
-            'input': """spec:\n  ports: &std\n  - port: *std\n""",
-            'expected': 'STRUCTURE_OK'
-        },
-        # FIX 5: Empty lines
-        {
-            'name': 'Empty lines breaking parent detection',
-            'input': """spec:\n\n\n                                   containers:\n""",
-            'expected': 'STRUCTURE_FIXED_1'
-        },
-        # FIX 6: Multiple errors
-        {
-            'name': 'Double indent disaster',
-            'input': """spec:\n                                   containers:\n                              - name: app\n""",
-            'expected': 'STRUCTURE_FIXED_2'
-        },
-        # FIX 7: Leading spaces on keys
-        {
-            'name': 'Leading spaces before key names',
-            'input': """spec:\n    containers:\n""",
-            'expected': 'STRUCTURE_FIXED_1'
-        },
-        # FIX 8: Tab+space mix
-        {
-            'name': 'Tab+space indentation chaos',
-            'input': """spec:\t  containers:\n""",
-            'expected': 'STRUCTURE_FIXED_1'
-        }
-    ]
-    
-    print("🧪 KUBECURO PHASE 1.2 - ENTERPRISE VALIDATION (8/8 Edge Cases)")
-    print("=" * 80)
-    
-    for case in test_cases:
-        print(f"\n📁 Test: {case['name']}")
-        print("-" * 60)
-        
-        lexer_fixed = lexer.process_string(case['input'])
-        final_yaml, status = structurer.process_yaml(lexer_fixed)
-        
-        print(f"✅ Status: {status} (Expected: {case['expected']})")
-        report = structurer.full_healing_report(case['input'], final_yaml, status)
-        print(f"📊 Lines fixed: {report['lines_changed']}")
-        print("\n✨ FINAL YAML:")
-        print(final_yaml)
-        print("\n" + "="*80)
-
-if __name__ == "__main__":
-    run_structurer_demo()
 
