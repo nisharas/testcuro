@@ -1,0 +1,64 @@
+# KUBECURO CHAOS TEST SUITE v1.0
+# Contains 23 intentional character and structural errors.
+---
+apiVersion: v1
+kind:Service
+metadata:
+  name: "chaos-app"
+  labels:
+    app: chaos # Stuck colon next
+    env:prod
+spec:
+	type: ClusterIP  # TAB CHARACTER HERE
+  ports:
+  - name:http
+    port:80
+    targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: &app_name chaos-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: *app_name
+  template:
+    metadata:
+      labels:
+        app: *app_name
+    spec:
+      containers:
+      -name: nginx-container  # STUCK DASH
+       image:nginx:latest     # STUCK COLON
+       ports:
+       - containerPort: 80
+       env:
+       - name: LOG_LEVEL
+         value: "debug" # Next line has 31 spaces
+                                     - name: CONFIG_PATH
+       # The following line has a tab + space mix
+	     value: /etc/config
+       # Missing space in comment
+       workingDir: /app#This comment is stuck
+      volumes:
+      - name: script-block
+        configMap:
+          name: script-cm
+---
+# MULTI-DOC DISASTER + EMPTY LINES
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-script
+data:
+  setup.sh: |
+    #!/bin/bash
+    echo "This is a protected block"
+    if [ $? -eq 0 ]; then
+        echo "Success"
+    fi
+
+  bad_indent_key:
+                                  value: "I am way too far to the right"
